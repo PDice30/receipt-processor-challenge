@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 
 import { Receipt } from "../models";
 
+import { logger } from "..";
 
 export const generateIdForReceipt = (): string => {
   return crypto.randomUUID();
@@ -25,8 +26,10 @@ export const calculatePoints = (receipt: Receipt): number => {
 
   // One point for every alphanumeric character in the retailer name.
   console.log(`receipt.retailer.length; : ${ receipt.retailer.replace(/[^A-Z]/gi, "").length }`);
-  points += receipt.retailer.replace(/[^A-Z]/gi, "").length;
 
+  const nameLength = receipt.retailer.replace(/[^A-Z]/gi, "").length;
+  points += nameLength;
+  logger.info(`${nameLength} points - retailer name has ${nameLength} characters`);
   // 50 points if the total is a round dollar amount with no cents.
   // const itemTotalPrice = receipt.items.reduce((acc, item) => acc += parseFloat(parseFloat(item.price).toFixed(2)), 0)
   // console.log(receipt.items[0].price);
@@ -65,6 +68,7 @@ export const calculatePoints = (receipt: Receipt): number => {
   points += (receipt.purchaseTime > '14:00' && receipt.purchaseTime < '16:00') ? 10 : 0;
 
   console.log(`totalPoints: ${points}`);
+  logger.info(points);
   return points;
 }
 
