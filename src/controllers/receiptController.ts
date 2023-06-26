@@ -50,6 +50,7 @@ export const getPoints = (req: Request, res: Response): Object => {
   // res.status(200).send(`Receipt GET points from id ${id}`);
 
   const foundReceipt = processedReceipts.find(processedReceipt => processedReceipt.id === id);
+  console.log(foundReceipt);
   if (foundReceipt) {
     const response = { 'points': foundReceipt.points };
     res.status(200).send(response);
