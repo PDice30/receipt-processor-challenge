@@ -1,3 +1,9 @@
+export type ProcessedReceipt = {
+  id: string,
+  receipt: Receipt,
+  points: number,
+}
+
 export type Receipt = {
   retailer: string,
   purchaseDate: string,
