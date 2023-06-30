@@ -1,6 +1,8 @@
-import test, { describe, it } from 'node:test';
+import request from 'supertest';
 
-const BASE_URL = 'localhost:3000';
+import app, { server } from '../../index'; // Assuming your app is defined in a separate file and exported as 'app'
+import { generateIdForReceipt, calculatePoints } from '../../services/receipts';
+import { ProcessedReceipt, Receipt } from '../../models/receipts';
 
 let receipt = {
   retailer: 'Target',
@@ -31,30 +33,98 @@ let receipt = {
   total: '35.35',
 };
 
-describe('Receipt Controller', () => {
-  describe('processReceipt function', () => {
-    it('should return 400 if the receipt is not provided', async () => {
-      const request = await fetch(`${BASE_URL}/receipts/process`, {
-        method: 'POST',
-        body: JSON.stringify({}),
+jest.mock('../../services/receipts', () => ({
+  generateIdForReceipt: jest.fn().mockReturnValue('mocked-id'),
+  calculatePoints: jest.fn().mockReturnValue(100),
+}));
+
+let processedReceipts: ProcessedReceipt[] = [];
+
+beforeEach(() => {
+  processedReceipts = [];
+});
+
+describe('Controller Tests', () => {
+  describe('POST /receipts/process', () => {
+    it('should process the receipt and return a response with status 200 and the generated ID', async () => {
+
+      const expectedResponse = { id: 'mocked-id' };
+
+      const response = await request(app)
+        .post('/receipts/process')
+        .send(receipt)
+        .expect(200);
+
+      expect(response.body).toEqual(expectedResponse);
+
+      processedReceipts.push({
+        id: expectedResponse.id,
+        receipt: receipt,
+        points: 28
       });
 
-      const response = await request.json();
-
-      console.log(response);
+      expect(processedReceipts).toHaveLength(1);
+      expect(processedReceipts[0].id).toBe('mocked-id');
+      expect(processedReceipts[0].receipt).toEqual(receipt);
+      expect(processedReceipts[0].points).toBe(28);
     });
 
-    it('should return 200 if the receipt provided is valid', async () => {
-      const request = await fetch(`${BASE_URL}/receipts/process`, {
-        method: 'POST',
-        body: JSON.stringify(receipt),
+    it('should process the receipt and return a response with status 200 and the generated ID', async () => {
+
+      const expectedResponse = { id: 'mocked-id' };
+
+      const response = await request(app)
+        .post('/receipts/process')
+        .send(receipt)
+        .expect(200);
+
+      expect(response.body).toEqual(expectedResponse);
+
+      processedReceipts.push({
+        id: expectedResponse.id,
+        receipt: receipt,
+        points: 28
       });
 
-      console.log(request);
+      expect(processedReceipts).toHaveLength(1);
+      expect(processedReceipts[0].id).toBe('mocked-id');
+      expect(processedReceipts[0].receipt).toEqual(receipt);
+      expect(processedReceipts[0].points).toBe(28);
+    });
+  });
 
-      const response = await request.json();
+  describe('GET /receipts/:id/points', () => {
+    it('should return the points for a processed receipt with status 200', async () => {
 
-      console.log(response);
+      const id = generateIdForReceipt();
+
+      processedReceipts.push({
+        id,
+        receipt,
+        points: 100,
+      });
+
+      const expectedResponse = { points: 100 };
+
+      const response = await request(app)
+        .get(`/receipts/${id}/points`)
+        .expect(200);
+
+      expect(response.body).toEqual(expectedResponse);
+    });
+
+    it('should return a 404 status if no receipt is found for the given ID', async () => {
+      const id = 'non-existent-id';
+
+      const response = await request(app)
+        .get(`/receipts/${id}/points`)
+        .expect(404);
+
+      expect(response.text).toBe('No receipt found for that id');
     });
   });
 });
+
+afterAll(() => {
+  server.close();
+})

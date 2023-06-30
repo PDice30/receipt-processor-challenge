@@ -9,6 +9,8 @@ app.use(json());
 
 app.use(router);
 
-app.listen(port, () => {
+export const server = app.listen(port, () => {
   console.log(`[Server]: Running at https://localhost:${port}`);
 });
+
+export default app;
