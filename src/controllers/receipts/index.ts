@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
-import { ProcessedReceipt, Receipt } from '../../models';
-import { calculatePoints, generateIdForReceipt } from '../../services';
+import { ProcessedReceipt, Receipt } from '../../models/receipts';
+import { calculatePoints, generateIdForReceipt } from '../../services/receipts';
 
 let processedReceipts: ProcessedReceipt[] = [];
 
