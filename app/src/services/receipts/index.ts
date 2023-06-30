@@ -2,12 +2,13 @@ import crypto from 'node:crypto';
 
 import { Receipt } from '../../models/receipts';
 
-import { logger } from '../..';
+import { logger } from '../../utils/logger';
 
 export const generateIdForReceipt = (): string => {
   return crypto.randomUUID();
 };
 
+// TODO: Log all output to a log in the form of what gets assigned points and why, as seen in the
 export const calculatePoints = (receipt: Receipt): number => {
   let points: number = 0;
 
