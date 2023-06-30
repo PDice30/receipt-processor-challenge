@@ -4,7 +4,7 @@ import app, { server } from '../../index'; // Assuming your app is defined in a 
 import { generateIdForReceipt, calculatePoints } from '../../services/receipts';
 import { ProcessedReceipt, Receipt } from '../../models/receipts';
 
-let receipt = {
+let receipt: Receipt = {
   retailer: 'Target',
   purchaseDate: '2022-01-01',
   purchaseTime: '13:01',
@@ -69,27 +69,42 @@ describe('Controller Tests', () => {
       expect(processedReceipts[0].points).toBe(28);
     });
 
-    it('should process the receipt and return a response with status 200 and the generated ID', async () => {
+    it('should fail to process an invalid purchaseTime and return a response with status 400', async () => {
 
-      const expectedResponse = { id: 'mocked-id' };
+      const expectedResponse = { 
+        type: 'ValidationError',
+        message: 'The receipt is invalid'
+      };
+
+      const invalidReceipt: Receipt = Object.create(receipt);
+
+      invalidReceipt.purchaseTime = '24:00';
 
       const response = await request(app)
         .post('/receipts/process')
-        .send(receipt)
-        .expect(200);
+        .send(invalidReceipt)
+        .expect(400);
 
       expect(response.body).toEqual(expectedResponse);
+    });
 
-      processedReceipts.push({
-        id: expectedResponse.id,
-        receipt: receipt,
-        points: 28
-      });
+    it('should fail to process an invalid purchaseDate and return a response with status 400', async () => {
 
-      expect(processedReceipts).toHaveLength(1);
-      expect(processedReceipts[0].id).toBe('mocked-id');
-      expect(processedReceipts[0].receipt).toEqual(receipt);
-      expect(processedReceipts[0].points).toBe(28);
+      const expectedResponse = { 
+        type: 'ValidationError',
+        message: 'The receipt is invalid'
+      };
+
+      const invalidReceipt: Receipt = Object.create(receipt);
+
+      invalidReceipt.purchaseDate = '2023-06-33';
+
+      const response = await request(app)
+        .post('/receipts/process')
+        .send(invalidReceipt)
+        .expect(400);
+
+      expect(response.body).toEqual(expectedResponse);
     });
   });
 

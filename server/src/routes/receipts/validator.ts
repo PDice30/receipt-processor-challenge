@@ -40,7 +40,7 @@ export const validate = (schema: any) => async (req: Request, res: Response, nex
     });
     return next();
   } catch (err: any) {
-    return res.status(500).json({ type: err.name, message: err.message });
+    return res.status(400).json({ type: err.name, message: 'The receipt is invalid' });
   }
 };
 
